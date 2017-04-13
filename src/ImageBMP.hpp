@@ -6,6 +6,18 @@ class ImageBMP
 {
 public:
 
+	struct Pixel
+	{
+		unsigned char b;
+		unsigned char g;
+		unsigned char r;
+
+		unsigned char GetValue()
+		{
+			return (b + g + r) / 3;
+		}
+	};
+
 	ImageBMP(const char* filename);
 	~ImageBMP();
 
@@ -13,11 +25,13 @@ public:
 
 	unsigned int GetWidth() { return width;	}
 	unsigned int GetHeight() { return height; }
-	unsigned int GetChannels() { return channelCount; }
 
-	char* GetPixels() { return pixelBuffer; }
+	Pixel* GetPixel(int x, int y);
+	void SetPixel(int x, int y, const Pixel& pixel);
 
 private:
+
+	bool isValid(int x, int y);
 
 	BITMAPFILEHEADER* bmpHeader;
 	BITMAPINFOHEADER* bmpInfo;
@@ -26,9 +40,6 @@ private:
 	unsigned int fileBufferSize;
 
 	char* pixelBuffer;
-	unsigned int pixelBufferSize;
-
 	unsigned int width;
 	unsigned int height;
-	unsigned int channelCount;
 };

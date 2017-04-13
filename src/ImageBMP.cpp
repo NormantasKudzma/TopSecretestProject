@@ -6,7 +6,6 @@ ImageBMP::ImageBMP(const char* filename)
 	, fileBuffer(nullptr)
 	, fileBufferSize(0)
 	, pixelBuffer(nullptr)
-	, pixelBufferSize(0)
 {
 	FILE* file = nullptr;
 	fopen_s(&file, filename, "rb");
@@ -24,17 +23,39 @@ ImageBMP::ImageBMP(const char* filename)
 	bmpInfo = reinterpret_cast<BITMAPINFOHEADER*>(fileBuffer + sizeof(BITMAPFILEHEADER));
 
 	pixelBuffer = fileBuffer + bmpHeader->bfOffBits;
-	pixelBufferSize = bmpHeader->bfSize - bmpHeader->bfOffBits;
-
 	width = bmpInfo->biWidth;
 	height = bmpInfo->biHeight;
-	channelCount = bmpInfo->biBitCount / 8;
 }
 
 ImageBMP::~ImageBMP()
 {
 	if (fileBuffer != nullptr)
 		delete fileBuffer;
+}
+
+bool ImageBMP::isValid(int x, int y)
+{
+	return (x >= 0 || x < width - 1 || y >= 0 || y < height - 1);
+}
+
+ImageBMP::Pixel* ImageBMP::GetPixel(int x, int y)
+{
+	Pixel* result = nullptr;
+
+	if (isValid(x, y) == true)
+	{
+		result = reinterpret_cast<Pixel*>(&pixelBuffer[(y * width + x) * sizeof(Pixel) + y]);
+	}
+	
+	return result;
+}
+
+void ImageBMP::SetPixel(int x, int y, const ImageBMP::Pixel& pixel)
+{
+	if (isValid(x, y) == true)
+	{
+		memcpy(&pixelBuffer[(y * width + x) * sizeof(Pixel) + y], &pixel, sizeof(Pixel));
+	}
 }
 
 void ImageBMP::Save(const char* filename)
